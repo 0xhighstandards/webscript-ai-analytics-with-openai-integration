@@ -1,6 +1,4 @@
-
 import { useState, useRef, useEffect } from "react";
-// render markdown returned by the API in guest mode as well
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
@@ -17,10 +15,12 @@ function Guest() {
   const [collapsed, setCollapsed] = useState(false);
 
   const textareaRef = useRef(null);
-  const messageEndRef = useRef(null); // Added for auto-scroll
+  const messageEndRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🔹 Auto-resize textarea
+  // ✅ Use Railway backend in production, localhost in development
+  const API_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -28,7 +28,6 @@ function Guest() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [script]);
 
-  // 🔹 Auto-scroll to bottom
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -46,10 +45,9 @@ function Guest() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // request markdown output so guest UI also renders correctly
         body: JSON.stringify({ script: currentScript, format: "markdown" }),
       });
 
@@ -61,7 +59,7 @@ function Guest() {
         ...prev,
         {
           role: "assistant",
-          content: data.result, // Flask already formats the AI text
+          content: data.result,
         },
       ]);
     } catch (err) {
@@ -138,7 +136,6 @@ function Guest() {
               <div className="bubble thinking">Analyzing script…</div>
             </div>
           )}
-          {/* 🔹 Scroll Anchor */}
           <div ref={messageEndRef} />
         </div>
 
