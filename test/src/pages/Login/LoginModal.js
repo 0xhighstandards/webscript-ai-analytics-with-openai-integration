@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { FaGoogle, FaFacebookF } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "@greatsumini/react-facebook-login";
 import "./login.css";
+
+const FACEBOOK_APP_ID = process.env.REACT_APP_FACEBOOK_APP_ID;
 
 function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ Moved ABOVE the early return
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
@@ -48,7 +50,38 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     onError: () => setError("Google sign-in was cancelled or failed."),
   });
 
-  // ✅ Early return AFTER all hooks
+  const handleFacebookSuccess = (response) => {
+    try {
+      const email = response.email || `fb_${response.id}@facebook.com`;
+      const name = response.name || "Facebook User";
+      const avatar = response.picture?.data?.url || "https://i.pravatar.cc/40";
+
+      localStorage.setItem("user_email", email);
+
+      const profiles = JSON.parse(localStorage.getItem("user_profiles")) || {};
+      if (!profiles[email]) {
+        profiles[email] = { username: name, avatar };
+        localStorage.setItem("user_profiles", JSON.stringify(profiles));
+      }
+
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      const exists = users.find((u) => u.email === email);
+      if (!exists) {
+        users.push({ email, password: null, provider: "facebook" });
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+
+      const userChatsKey = `user_chats_${email}`;
+      if (!localStorage.getItem(userChatsKey)) {
+        localStorage.setItem(userChatsKey, JSON.stringify([]));
+      }
+
+      onLoginSuccess();
+    } catch (err) {
+      setError("Facebook sign-in failed. Please try again.");
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
@@ -110,10 +143,18 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             Continue with Google
           </button>
 
-          <button className="social-btn facebook" onClick={onLoginSuccess}>
-            <FaFacebookF className="social-icon" />
-            Continue with Facebook
-          </button>
+          <FacebookLogin
+            appId={FACEBOOK_APP_ID}
+            fields="name,email,picture"
+            onSuccess={handleFacebookSuccess}
+            onFail={(err) => setError("Facebook sign-in failed. Please try again.")}
+            render={({ onClick }) => (
+              <button className="social-btn facebook" onClick={onClick}>
+                <FaFacebookF className="social-icon" />
+                Continue with Facebook
+              </button>
+            )}
+          />
         </div>
 
         <div className="divider-text"><span>or</span></div>
@@ -141,3 +182,10 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 }
 
 export default LoginModal;
+```
+
+Now do these two things:
+
+**1. Add variable in Railway** → `/test` → **Variables**:
+```
+REACT_APP_FACEBOOK_APP_ID=1494808675475146
