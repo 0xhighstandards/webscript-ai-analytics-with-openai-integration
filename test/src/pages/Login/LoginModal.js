@@ -50,10 +50,16 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     onError: () => setError("Google sign-in was cancelled or failed."),
   });
 
+  // ✅ UPDATED: Added strict validation before proceeding
   const handleFacebookSuccess = (response) => {
     try {
+      if (!response || !response.id || !response.name) {
+        setError("Facebook sign-in failed. Please try again.");
+        return;
+      }
+
       const email = response.email || `fb_${response.id}@facebook.com`;
-      const name = response.name || "Facebook User";
+      const name = response.name;
       const avatar = response.picture?.data?.url || "https://i.pravatar.cc/40";
 
       localStorage.setItem("user_email", email);
@@ -143,11 +149,16 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             Continue with Google
           </button>
 
+          {/* ✅ UPDATED: Added autoLoad={false} and improved onFail */}
           <FacebookLogin
             appId={FACEBOOK_APP_ID}
             fields="name,email,picture"
             onSuccess={handleFacebookSuccess}
-            onFail={(err) => setError("Facebook sign-in failed. Please try again.")}
+            onFail={(err) => {
+              console.log("Facebook failed:", err);
+              setError("Facebook sign-in failed. Please try again.");
+            }}
+            autoLoad={false}
             render={({ onClick }) => (
               <button className="social-btn facebook" onClick={onClick}>
                 <FaFacebookF className="social-icon" />
@@ -182,10 +193,3 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 }
 
 export default LoginModal;
-```
-
-Now do these two things:
-
-**1. Add variable in Railway** → `/test` → **Variables**:
-```
-REACT_APP_FACEBOOK_APP_ID=1494808675475146
