@@ -50,14 +50,15 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     onError: () => setError("Google sign-in was cancelled or failed."),
   });
 
-  // ✅ UPDATED: Added strict validation before proceeding
   const handleFacebookSuccess = (response) => {
     try {
+      // ✅ Strict validation
       if (!response || !response.id || !response.name) {
         setError("Facebook sign-in failed. Please try again.");
         return;
       }
 
+      // ✅ Email fallback since email scope requires app review
       const email = response.email || `fb_${response.id}@facebook.com`;
       const name = response.name;
       const avatar = response.picture?.data?.url || "https://i.pravatar.cc/40";
@@ -149,10 +150,11 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             Continue with Google
           </button>
 
-          {/* ✅ UPDATED: Added autoLoad={false} and improved onFail */}
+          {/* ✅ Removed email scope, using only public_profile */}
           <FacebookLogin
             appId={FACEBOOK_APP_ID}
-            fields="name,email,picture"
+            fields="name,picture"
+            scope="public_profile"
             onSuccess={handleFacebookSuccess}
             onFail={(err) => {
               console.log("Facebook failed:", err);
