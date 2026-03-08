@@ -8,6 +8,8 @@ import { useNavigate, Link } from "react-router-dom";
 import LoginModal from "../Login/LoginModal";
 import "./guest.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function Guest() {
   const [script, setScript] = useState("");
   const [messages, setMessages] = useState([]);
@@ -16,10 +18,9 @@ function Guest() {
   const [collapsed, setCollapsed] = useState(false);
 
   const textareaRef = useRef(null);
-  const messageEndRef = useRef(null); // Added for auto-scroll
+  const messageEndRef = useRef(null);
   const navigate = useNavigate();
 
-  // 🔹 Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -27,7 +28,6 @@ function Guest() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [script]);
 
-  // 🔹 Auto-scroll to bottom
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -45,10 +45,9 @@ function Guest() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // request markdown output so guest UI also renders correctly
         body: JSON.stringify({ script: currentScript, format: "markdown" }),
       });
 
@@ -60,7 +59,7 @@ function Guest() {
         ...prev,
         {
           role: "assistant",
-          content: data.result, // Flask already formats the AI text
+          content: data.result,
         },
       ]);
     } catch (err) {
@@ -87,7 +86,6 @@ function Guest() {
 
   return (
     <div className="chatgpt-layout">
-      {/* Sidebar */}
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           <Link to="/" className="logo">
@@ -112,7 +110,6 @@ function Guest() {
         )}
       </aside>
 
-      {/* Chat Area */}
       <main className="chat-area">
         <div className="chat-messages">
           {messages.map((msg, index) => (
@@ -137,11 +134,9 @@ function Guest() {
               <div className="bubble thinking">Analyzing script…</div>
             </div>
           )}
-          {/* 🔹 Scroll Anchor */}
           <div ref={messageEndRef} />
         </div>
 
-        {/* Chat Input */}
         <div className="chat-input">
           <textarea
             ref={textareaRef}
