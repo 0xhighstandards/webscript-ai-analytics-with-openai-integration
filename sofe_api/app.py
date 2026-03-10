@@ -101,7 +101,7 @@ Input:
                 "Content-Type": "application/json",
             },
             json={
-                "model": "anthropic/claude-haiku-4.5",
+                "model": "google/gemma-3-4b-it:free",
                 "messages": [
                     {"role": "user", "content": ai_prompt}
                 ]
