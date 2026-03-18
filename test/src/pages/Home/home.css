@@ -1,6 +1,6 @@
 .home-page {
   min-height: 100vh;
-  background-color: #0f2027; /* dark UI background */
+  background-color: #0f2027;
   color: white;
   font-family: "Inter", sans-serif;
 }
@@ -23,7 +23,7 @@ body {
   padding: 15px 5%;
   position: sticky;
   top: 0;
-  background-color: #203a43; /* UI header color */
+  background-color: #203a43;
   z-index: 1000;
   width: 100%;
   box-sizing: border-box;
@@ -51,7 +51,7 @@ body {
 .nav-button {
   padding: 7px 40px;
   font-size: 12px;
-  background-color: #4fd1c5; /* mint accent */
+  background-color: #4fd1c5;
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -105,7 +105,7 @@ body {
   margin: auto;
   width: 50%;
   line-height: 2;
-  color: #a0aec0; /* muted UI text */
+  color: #a0aec0;
   font-weight: lighter;
   margin-top: 20px;
 }
@@ -164,20 +164,20 @@ body {
 /* Image box */
 .image-box {
   width: 90%;
-  height: 972px; /* fixed height to maintain size */
+  height: 972px;
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #4fd1c5; /* UI accent border */
+  border: 2px solid #4fd1c5;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative; /* stack images for crossfade */
+  position: relative;
   margin-bottom: 100px;
 }
 
 /* Fade animation */
 .fade-image {
-  position: absolute; /* stack on top of each other */
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -185,11 +185,11 @@ body {
   object-fit: cover;
   border-radius: 12px;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out; /* smooth fade */
+  transition: opacity 1.5s ease-in-out;
 }
 
 .fade-image.active {
-  opacity: 1; /* visible image */
+  opacity: 1;
 }
 
 .try {
@@ -272,31 +272,29 @@ body {
 }
 
 /* ------------------ CUSTOM SCROLLBAR (GLOBAL) ------------------ */
-/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f2027; /* matches page background */
+  background: #0f2027;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #4fd1c5; /* accent color */
+  background-color: #4fd1c5;
   border-radius: 10px;
-  border: 3px solid #0f2027; /* space around thumb */
+  border: 3px solid #0f2027;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #38b2ac; /* darker shade on hover */
+  background-color: #38b2ac;
 }
 
-/* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #4fd1c5 transparent; /* thumb color, track color */
+  scrollbar-color: #4fd1c5 transparent;
 }
 
 /* --- SCROLL REVEAL --- */
@@ -316,4 +314,188 @@ html {
   border: none;
   border-top: 1px solid #4fd1c5;
   margin: 0;
+}
+
+/* ================= MOBILE (max-width: 768px) ================= */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  .home-page {
+    overflow-x: hidden;
+  }
+
+  .home-header {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    padding: 12px 4%;
+  }
+
+  .title {
+    font-size: 17px;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .webscript-button-wrapper {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .webscript-button {
+    width: auto;
+    padding: 7px 14px;
+    font-size: 12px;
+    height: 36px;
+  }
+
+  .nav-buttons {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    gap: 6px;
+  }
+
+  .nav-button {
+    padding: 6px 14px;
+    font-size: 11px;
+  }
+
+  .home-content1 h2 {
+    font-size: 26px;
+    width: 90%;
+    margin: 36px auto 10px auto;
+    line-height: 1.4;
+  }
+
+  .home-content2 h3,
+  .home-content3 h3 {
+    font-size: 14px;
+    width: 88%;
+    margin-top: 16px;
+  }
+
+  .center-button {
+    margin: 28px auto 50px auto;
+  }
+
+  .testing-button {
+    font-size: 14px;
+    height: 44px;
+    padding: 8px 28px;
+    margin-bottom: 0;
+  }
+
+  .home-content4 h3 {
+    font-size: 17px;
+    width: 88%;
+    margin: 36px auto 18px auto;
+  }
+
+  .image-section {
+    padding: 0 4%;
+    box-sizing: border-box;
+  }
+
+  .image-box {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 28px;
+  }
+
+  .try {
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .try h3 {
+    font-size: 24px;
+    width: 88%;
+    text-align: center;
+  }
+
+  .trybutton {
+    margin-left: 0;
+    margin-bottom: 40px;
+    padding: 10px 28px;
+  }
+
+  .AboutUs {
+    width: 88%;
+    height: auto;
+    border-radius: 24px;
+    padding: 24px 20px;
+    overflow: visible;
+    margin-bottom: 60px;
+  }
+
+  .home-content-about h3 {
+    font-size: 20px;
+    width: 88%;
+  }
+
+  .home-content-about p {
+    font-size: 14px;
+    width: 92%;
+    margin: 8px auto;
+  }
+
+  .footer {
+    font-size: 13px;
+    padding: 16px 10px;
+  }
+}
+
+/* ================= SMALL MOBILE (max-width: 480px) ================= */
+@media (max-width: 480px) {
+  .title {
+    font-size: 15px;
+  }
+
+  .webscript-button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .nav-button {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .home-content1 h2 {
+    font-size: 22px;
+    width: 92%;
+  }
+
+  .home-content2 h3,
+  .home-content3 h3 {
+    font-size: 13px;
+    width: 92%;
+  }
+
+  .home-content4 h3 {
+    font-size: 15px;
+    width: 92%;
+  }
+
+  .image-box {
+    height: 170px;
+  }
+
+  .try h3 {
+    font-size: 20px;
+    width: 92%;
+  }
+
+  .AboutUs {
+    width: 92%;
+    border-radius: 20px;
+  }
+
+  .home-content-about p {
+    font-size: 13px;
+  }
 }
