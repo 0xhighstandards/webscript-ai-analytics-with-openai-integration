@@ -6,6 +6,7 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import { useNavigate, Link } from "react-router-dom";
 import LoginModal from "../Login/LoginModal";
+import PageLoader from "../PageLoader/PageLoader";
 import "./guest.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -14,6 +15,7 @@ function Guest() {
   const [script, setScript] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -31,6 +33,12 @@ function Guest() {
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Page Loader Logic
+  useEffect(() => {
+    const timer = setTimeout(() => setPageLoading(false), 1800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const analyzeScript = async () => {
     if (!script.trim() || loading) return;
@@ -86,6 +94,9 @@ function Guest() {
 
   return (
     <div className="chatgpt-layout">
+      {/* --- PAGE LOADER --- */}
+      <PageLoader visible={pageLoading} />
+
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           <Link to="/" className="logo">
