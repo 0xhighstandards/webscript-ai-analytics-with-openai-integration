@@ -99,7 +99,7 @@ function Guest() {
 
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
-          <Link to="/" className="logo">
+          <Link to="/" className="logo" style={{ textDecoration: "none" }}>
             WebScript AI
           </Link>
           <button
