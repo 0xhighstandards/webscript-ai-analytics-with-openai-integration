@@ -509,7 +509,7 @@ function UserUI() {
       {showAnalytics && (
         <div className="modal-overlay" onClick={() => setShowAnalytics(false)}>
           <div className="analytics-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>📊 Your Analytics</h2>
+            <h2>Your Analytics</h2>
 
             {/* ROW 1 — Language Donut (centered, standalone) */}
             <div className="analytics-row analytics-row-center">
