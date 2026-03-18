@@ -61,3 +61,45 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+
+/* ================= MOBILE (max-width: 768px) ================= */
+@media (max-width: 768px) {
+  .loader-typed {
+    font-size: 24px;
+    letter-spacing: 2px;
+  }
+
+  .loader-cursor {
+    font-size: 24px;
+  }
+
+  .loader-typing-wrapper {
+    min-width: 160px;
+  }
+
+  .loader-sub {
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+}
+
+/* ================= SMALL MOBILE (max-width: 480px) ================= */
+@media (max-width: 480px) {
+  .loader-typed {
+    font-size: 20px;
+    letter-spacing: 1.5px;
+  }
+
+  .loader-cursor {
+    font-size: 20px;
+  }
+
+  .loader-typing-wrapper {
+    min-width: 130px;
+  }
+
+  .loader-sub {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+}
