@@ -1,6 +1,6 @@
 .home-page {
   min-height: 100vh;
-  background-color: #0f2027;
+  background-color: #0f2027; /* dark UI background */
   color: white;
   font-family: "Inter", sans-serif;
 }
@@ -23,7 +23,7 @@ body {
   padding: 15px 5%;
   position: sticky;
   top: 0;
-  background-color: #203a43;
+  background-color: #203a43; /* UI header color */
   z-index: 1000;
   width: 100%;
   box-sizing: border-box;
@@ -51,7 +51,7 @@ body {
 .nav-button {
   padding: 7px 40px;
   font-size: 12px;
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* mint accent */
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -105,7 +105,7 @@ body {
   margin: auto;
   width: 50%;
   line-height: 2;
-  color: #a0aec0;
+  color: #a0aec0; /* muted UI text */
   font-weight: lighter;
   margin-top: 20px;
 }
@@ -164,20 +164,20 @@ body {
 /* Image box */
 .image-box {
   width: 90%;
-  height: 972px;
+  height: 972px; /* fixed height to maintain size */
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #4fd1c5;
+  border: 2px solid #4fd1c5; /* UI accent border */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: relative; /* stack images for crossfade */
   margin-bottom: 100px;
 }
 
 /* Fade animation */
 .fade-image {
-  position: absolute;
+  position: absolute; /* stack on top of each other */
   top: 0;
   left: 0;
   width: 100%;
@@ -185,11 +185,11 @@ body {
   object-fit: cover;
   border-radius: 12px;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s ease-in-out; /* smooth fade */
 }
 
 .fade-image.active {
-  opacity: 1;
+  opacity: 1; /* visible image */
 }
 
 .try {
@@ -272,29 +272,31 @@ body {
 }
 
 /* ------------------ CUSTOM SCROLLBAR (GLOBAL) ------------------ */
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f2027;
+  background: #0f2027; /* matches page background */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* accent color */
   border-radius: 10px;
-  border: 3px solid #0f2027;
+  border: 3px solid #0f2027; /* space around thumb */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #38b2ac;
+  background-color: #38b2ac; /* darker shade on hover */
 }
 
+/* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #4fd1c5 transparent;
+  scrollbar-color: #4fd1c5 transparent; /* thumb color, track color */
 }
 
 /* --- SCROLL REVEAL --- */
@@ -316,186 +318,230 @@ html {
   margin: 0;
 }
 
-/* ================= MOBILE (max-width: 768px) ================= */
+
+/* ==============================================
+   MOBILE RESPONSIVE
+   ============================================== */
+
+/* --- TABLET (max-width: 768px) --- */
 @media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden;
-  }
 
-  .home-page {
-    overflow-x: hidden;
-  }
-
+  /* ── HEADER: keep horizontal nav, compress columns ── */
   .home-header {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: auto 1fr auto;
+    padding: 10px 3%;
     gap: 8px;
-    padding: 12px 4%;
   }
 
   .title {
-    font-size: 17px;
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .webscript-button-wrapper {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-  }
-
-  .webscript-button {
-    width: auto;
-    padding: 7px 14px;
-    font-size: 12px;
-    height: 36px;
+    font-size: 16px;
+    white-space: nowrap;
   }
 
   .nav-buttons {
-    grid-column: 1 / -1;
-    grid-row: 2;
     justify-self: center;
     gap: 6px;
   }
 
   .nav-button {
-    padding: 6px 14px;
-    font-size: 11px;
+    padding: 5px 14px;
+    font-size: 10px;
+    white-space: nowrap;
   }
 
+  .webscript-button {
+    width: 100px;
+    font-size: 12px;
+    padding: 6px 10px;
+    height: 36px;
+  }
+
+  /* ── HERO TEXT ── */
   .home-content1 h2 {
-    font-size: 26px;
-    width: 90%;
-    margin: 36px auto 10px auto;
-    line-height: 1.4;
+    font-size: 28px;
+    width: 88%;
+    margin: 50px auto 10px auto;
+    line-height: 1.5;
   }
 
   .home-content2 h3,
   .home-content3 h3 {
-    font-size: 14px;
-    width: 88%;
-    margin-top: 16px;
+    font-size: 15px;
+    width: 85%;
+    margin-top: 15px;
   }
 
+  /* ── CTA BUTTON ── */
   .center-button {
-    margin: 28px auto 50px auto;
+    margin: 40px auto 80px auto;
   }
 
   .testing-button {
     font-size: 14px;
-    height: 44px;
-    padding: 8px 28px;
-    margin-bottom: 0;
+    padding: 10px 24px;
+    height: auto;
+    margin-bottom: 80px;
   }
 
+  /* ── FEATURES HEADING ── */
   .home-content4 h3 {
-    font-size: 17px;
-    width: 88%;
-    margin: 36px auto 18px auto;
+    font-size: 18px;
+    width: 85%;
+    margin: 40px auto 25px auto;
   }
 
-  .image-section {
-    padding: 0 4%;
-    box-sizing: border-box;
-  }
-
+  /* ── IMAGE BOX: replace fixed 972px height ── */
   .image-box {
-    width: 100%;
-    height: 200px;
-    margin-bottom: 28px;
+    height: 260px;
+    width: 92%;
+    border-radius: 10px;
+    margin-bottom: 50px;
   }
 
-  .try {
-    margin-bottom: 40px;
-    text-align: center;
+  /* ── ABOUT HEADING ── */
+  .home-content-about h3 {
+    font-size: 20px;
+    width: 85%;
   }
 
+  /* ── ABOUT BOX: remove fixed height that clips content ── */
+  .AboutUs {
+    width: 85%;
+    height: auto;
+    border-radius: 24px;
+    padding: 30px 20px;
+    margin-bottom: 60px;
+  }
+
+  .home-content-about p {
+    font-size: 15px;
+    width: 90%;
+    line-height: 1.8;
+  }
+
+  /* ── FOOTER CTA: fix hardcoded margin-left: 480px ── */
   .try h3 {
-    font-size: 24px;
-    width: 88%;
+    font-size: 28px;
+    width: 85%;
     text-align: center;
   }
 
   .trybutton {
     margin-left: 0;
-    margin-bottom: 40px;
-    padding: 10px 28px;
-  }
-
-  .AboutUs {
-    width: 88%;
-    height: auto;
-    border-radius: 24px;
-    padding: 24px 20px;
-    overflow: visible;
-    margin-bottom: 60px;
-  }
-
-  .home-content-about h3 {
-    font-size: 20px;
-    width: 88%;
-  }
-
-  .home-content-about p {
+    display: block;
+    margin: 0 auto 60px auto;
     font-size: 14px;
-    width: 92%;
-    margin: 8px auto;
+    height: auto;
+    padding: 12px 28px;
   }
 
   .footer {
-    font-size: 13px;
+    font-size: 12px;
     padding: 16px 10px;
   }
 }
 
-/* ================= SMALL MOBILE (max-width: 480px) ================= */
+/* --- SMALL MOBILE (max-width: 480px) --- */
 @media (max-width: 480px) {
-  .title {
-    font-size: 15px;
+
+  /* ── HEADER: two-row layout — logo+login on top, nav pills below ── */
+  .home-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 4%;
   }
 
-  .webscript-button {
-    padding: 6px 10px;
-    font-size: 11px;
+  .title {
+    font-size: 15px;
+    align-self: flex-start;
+  }
+
+  .webscript-button-wrapper {
+    position: absolute;
+    right: 4%;
+    top: 10px;
+  }
+
+  /* Nav pills: still horizontal, centered below */
+  .nav-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
   }
 
   .nav-button {
-    padding: 5px 10px;
-    font-size: 10px;
+    padding: 4px 12px;
+    font-size: 9px;
+    white-space: nowrap;
   }
 
+  .webscript-button {
+    width: 85px;
+    font-size: 11px;
+    height: 32px;
+    padding: 5px 8px;
+  }
+
+  /* ── HERO ── */
   .home-content1 h2 {
     font-size: 22px;
     width: 92%;
+    margin-top: 40px;
+    line-height: 1.4;
   }
 
   .home-content2 h3,
   .home-content3 h3 {
     font-size: 13px;
-    width: 92%;
+    width: 90%;
   }
 
+  .testing-button {
+    font-size: 13px;
+    padding: 9px 20px;
+    margin-bottom: 60px;
+  }
+
+  /* ── FEATURES ── */
   .home-content4 h3 {
     font-size: 15px;
-    width: 92%;
+    width: 90%;
   }
 
+  /* ── IMAGES ── */
   .image-box {
-    height: 170px;
+    height: 200px;
+    width: 94%;
   }
 
-  .try h3 {
-    font-size: 20px;
-    width: 92%;
-  }
-
+  /* ── ABOUT ── */
   .AboutUs {
-    width: 92%;
-    border-radius: 20px;
+    width: 90%;
+    border-radius: 16px;
+    padding: 24px 16px;
   }
 
   .home-content-about p {
     font-size: 13px;
+    width: 95%;
+  }
+
+  /* ── FOOTER CTA ── */
+  .try h3 {
+    font-size: 20px;
+    width: 90%;
+  }
+
+  .trybutton {
+    font-size: 13px;
+    padding: 10px 22px;
+  }
+
+  .footer {
+    font-size: 11px;
   }
 }
