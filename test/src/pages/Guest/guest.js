@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-// render markdown returned by the API in guest mode as well
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
@@ -18,6 +17,7 @@ function Guest() {
   const [pageLoading, setPageLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const textareaRef = useRef(null);
   const messageEndRef = useRef(null);
@@ -34,10 +34,22 @@ function Guest() {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Page Loader Logic
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 1800);
     return () => clearTimeout(timer);
+  }, []);
+
+  /* ================= MOBILE DETECTION ================= */
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) setCollapsed(true);
+      else setCollapsed(false);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const analyzeScript = async () => {
@@ -65,10 +77,7 @@ function Guest() {
 
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: data.result,
-        },
+        { role: "assistant", content: data.result },
       ]);
     } catch (err) {
       console.error(err);
@@ -76,8 +85,7 @@ function Guest() {
         ...prev,
         {
           role: "assistant",
-          content:
-            "⚠️ Connection Error. Please ensure the Flask server is running.",
+          content: "⚠️ Connection Error. Please ensure the Flask server is running.",
         },
       ]);
     } finally {
@@ -94,14 +102,11 @@ function Guest() {
 
   return (
     <div className="chatgpt-layout">
-      {/* --- PAGE LOADER --- */}
       <PageLoader visible={pageLoading} />
 
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
-          <Link to="/" className="logo">
-            WebScript AI
-          </Link>
+          <Link to="/" className="logo">WebScript AI</Link>
           <button
             className="collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
@@ -110,13 +115,22 @@ function Guest() {
           </button>
         </div>
 
-        {!collapsed && (
+        {!collapsed && !isMobile && (
           <div className="sidebar-content">
             <div className="guest-badge">Guest Mode</div>
             <button className="login-button" onClick={() => setShowLogin(true)}>
               Log in
             </button>
             <p className="hint">Log in to save analyses and history.</p>
+          </div>
+        )}
+
+        {/* On mobile show login button inline in the header row */}
+        {isMobile && (
+          <div className="mobile-sidebar-actions">
+            <button className="login-button" onClick={() => setShowLogin(true)}>
+              Log in
+            </button>
           </div>
         )}
       </aside>
@@ -149,18 +163,20 @@ function Guest() {
         </div>
 
         <div className="chat-input">
-          <textarea
-            ref={textareaRef}
-            placeholder="Paste your script here…"
-            value={script}
-            onChange={(e) => setScript(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={1}
-            disabled={loading}
-          />
-          <button onClick={analyzeScript} disabled={loading || !script.trim()}>
-            ➤
-          </button>
+          <div className="chat-input-inner">
+            <textarea
+              ref={textareaRef}
+              placeholder="Paste your script here…"
+              value={script}
+              onChange={(e) => setScript(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              disabled={loading}
+            />
+            <button onClick={analyzeScript} disabled={loading || !script.trim()}>
+              ➤
+            </button>
+          </div>
         </div>
       </main>
 

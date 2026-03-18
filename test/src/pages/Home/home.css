@@ -319,6 +319,16 @@ html {
 
 /* ================= MOBILE (max-width: 768px) ================= */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .home-page {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   .home-header {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;

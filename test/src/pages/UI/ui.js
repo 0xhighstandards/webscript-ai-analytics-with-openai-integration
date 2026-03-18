@@ -28,7 +28,6 @@ function UserUI() {
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [dropdownChatId, setDropdownChatId] = useState(null);
 
-  // ← NEW: track if we're on mobile
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const textareaRef = useRef(null);
@@ -55,7 +54,6 @@ function UserUI() {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      // Auto-collapse sidebar on mobile
       if (mobile) setCollapsed(true);
       else setCollapsed(false);
     };
@@ -162,7 +160,6 @@ function UserUI() {
       if (donutChartInstance.current) donutChartInstance.current.destroy();
       if (barChartInstance.current) barChartInstance.current.destroy();
 
-      // DONUT CHART — Most Used Languages
       if (donutChartRef.current) {
         const langLabels = Object.keys(analytics.languageCounts);
         const langData = Object.values(analytics.languageCounts);
@@ -221,7 +218,6 @@ function UserUI() {
         });
       }
 
-      // LINE CHART — Analyses Over Time
       if (lineChartRef.current) {
         lineChartInstance.current = new Chart(lineChartRef.current, {
           type: "line",
@@ -253,7 +249,6 @@ function UserUI() {
         });
       }
 
-      // BAR CHART — Activity by Day
       if (barChartRef.current) {
         barChartInstance.current = new Chart(barChartRef.current, {
           type: "bar",
@@ -319,7 +314,6 @@ function UserUI() {
   const openChat = (chat) => {
     setActiveChatId(chat.id);
     setMessages(chat.messages);
-    // Close sidebar on mobile after selecting a chat
     if (isMobile) setCollapsed(true);
   };
 
@@ -462,7 +456,6 @@ function UserUI() {
           <>
             <button className="new-chat-btn" onClick={startNewChat}>+ New Chat</button>
 
-            {/* Hide chat list on mobile */}
             {!isMobile && (
               <div className="chat-list">
                 {chats
@@ -545,8 +538,10 @@ function UserUI() {
         </div>
 
         <div className="chat-input">
-          <textarea ref={textareaRef} placeholder="Paste your code..." value={script} onChange={(e) => setScript(e.target.value)} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
-          <button onClick={analyzeScript} disabled={loading}>➤</button>
+          <div className="chat-input-inner">
+            <textarea ref={textareaRef} placeholder="Paste your code..." value={script} onChange={(e) => setScript(e.target.value)} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
+            <button onClick={analyzeScript} disabled={loading}>➤</button>
+          </div>
         </div>
       </main>
 
