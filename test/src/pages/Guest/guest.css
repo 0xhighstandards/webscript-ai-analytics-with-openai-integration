@@ -329,26 +329,22 @@
   border-bottom-right-radius: 6px;
 }
 
-.user .bubble:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 6px 25px rgba(79, 209, 197, 0.4);
-}
-
 .assistant .bubble {
   background: rgba(32, 58, 67, 0.85);
   color: #cbd5f5;
   border-bottom-left-radius: 6px;
 }
 
-.assistant .bubble:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 6px 25px rgba(79, 209, 197, 0.2);
-}
-
 .bubble.thinking {
   font-style: italic;
   opacity: 0.75;
   animation: pulse 1.2s infinite;
+}
+
+.user .bubble:hover,
+.assistant .bubble:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(79, 209, 197, 0.2);
 }
 
 /* ================= Chat Input ================= */
