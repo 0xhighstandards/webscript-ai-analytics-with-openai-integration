@@ -28,8 +28,6 @@ function UserUI() {
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const [dropdownChatId, setDropdownChatId] = useState(null);
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
   const textareaRef = useRef(null);
   const messageEndRef = useRef(null);
   const lineChartRef = useRef(null);
@@ -47,19 +45,6 @@ function UserUI() {
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 1800);
     return () => clearTimeout(timer);
-  }, []);
-
-  /* ================= MOBILE DETECTION ================= */
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
-      setIsMobile(mobile);
-      if (mobile) setCollapsed(true);
-      else setCollapsed(false);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   /* ================= LOAD / SAVE DATA ================= */
@@ -160,6 +145,7 @@ function UserUI() {
       if (donutChartInstance.current) donutChartInstance.current.destroy();
       if (barChartInstance.current) barChartInstance.current.destroy();
 
+      // DONUT CHART — Most Used Languages
       if (donutChartRef.current) {
         const langLabels = Object.keys(analytics.languageCounts);
         const langData = Object.values(analytics.languageCounts);
@@ -203,6 +189,7 @@ function UserUI() {
                       strokeStyle: "transparent",
                       hidden: false,
                       index: i,
+                      // Chart.js 4.x uses these:
                       fontColor: "#cbd5f5",
                       color: "#cbd5f5",
                     }));
@@ -218,6 +205,7 @@ function UserUI() {
         });
       }
 
+      // LINE CHART — Analyses Over Time
       if (lineChartRef.current) {
         lineChartInstance.current = new Chart(lineChartRef.current, {
           type: "line",
@@ -249,6 +237,7 @@ function UserUI() {
         });
       }
 
+      // BAR CHART — Activity by Day
       if (barChartRef.current) {
         barChartInstance.current = new Chart(barChartRef.current, {
           type: "bar",
@@ -314,7 +303,6 @@ function UserUI() {
   const openChat = (chat) => {
     setActiveChatId(chat.id);
     setMessages(chat.messages);
-    if (isMobile) setCollapsed(true);
   };
 
   const deleteChat = (e, chatId) => {
@@ -455,37 +443,34 @@ function UserUI() {
         {!collapsed && (
           <>
             <button className="new-chat-btn" onClick={startNewChat}>+ New Chat</button>
-
-            {!isMobile && (
-              <div className="chat-list">
-                {chats
-                  .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
-                  .map((chat) => (
-                    <div
-                      key={chat.id}
-                      className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
-                      onClick={() => openChat(chat)}
-                    >
-                      {chat.isEditing ? (
-                        <input
-                          type="text"
-                          value={chat.title}
-                          onChange={(e) => setChats((prev) => prev.map((c) => c.id === chat.id ? { ...c, title: e.target.value } : c))}
-                          onBlur={() => setChats((prev) => prev.map((c) => c.id === chat.id ? { ...c, isEditing: false } : c))}
-                          onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }}
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="chat-title">
-                          {chat.title}
-                          {chat.pinned && <span className="pinned-badge">Pinned</span>}
-                        </span>
-                      )}
-                      <button className="options-btn" onClick={(e) => toggleDropdown(e, chat.id)}>⋮</button>
-                    </div>
-                  ))}
-              </div>
-            )}
+            <div className="chat-list">
+              {chats
+                .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
+                .map((chat) => (
+                  <div
+                    key={chat.id}
+                    className={`chat-item ${chat.id === activeChatId ? "active" : ""}`}
+                    onClick={() => openChat(chat)}
+                  >
+                    {chat.isEditing ? (
+                      <input
+                        type="text"
+                        value={chat.title}
+                        onChange={(e) => setChats((prev) => prev.map((c) => c.id === chat.id ? { ...c, title: e.target.value } : c))}
+                        onBlur={() => setChats((prev) => prev.map((c) => c.id === chat.id ? { ...c, isEditing: false } : c))}
+                        onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }}
+                        autoFocus
+                      />
+                    ) : (
+                      <span className="chat-title">
+                        {chat.title}
+                        {chat.pinned && <span className="pinned-badge">Pinned</span>}
+                      </span>
+                    )}
+                    <button className="options-btn" onClick={(e) => toggleDropdown(e, chat.id)}>⋮</button>
+                  </div>
+                ))}
+            </div>
 
             <div className="sidebar-bottom">
               <button className="analytics-button" onClick={() => setShowAnalytics(true)}>📊 Analytics</button>
@@ -538,10 +523,8 @@ function UserUI() {
         </div>
 
         <div className="chat-input">
-          <div className="chat-input-inner">
-            <textarea ref={textareaRef} placeholder="Paste your code..." value={script} onChange={(e) => setScript(e.target.value)} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
-            <button onClick={analyzeScript} disabled={loading}>➤</button>
-          </div>
+          <textarea ref={textareaRef} placeholder="Paste your code..." value={script} onChange={(e) => setScript(e.target.value)} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
+          <button onClick={analyzeScript} disabled={loading}>➤</button>
         </div>
       </main>
 

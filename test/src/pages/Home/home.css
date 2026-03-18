@@ -1,7 +1,6 @@
-/* ================= Layout ================= */
 .home-page {
   min-height: 100vh;
-  background-color: #0f2027;
+  background-color: #0f2027; /* dark UI background */
   color: white;
   font-family: "Inter", sans-serif;
 }
@@ -24,7 +23,7 @@ body {
   padding: 15px 5%;
   position: sticky;
   top: 0;
-  background-color: #203a43;
+  background-color: #203a43; /* UI header color */
   z-index: 1000;
   width: 100%;
   box-sizing: border-box;
@@ -52,7 +51,7 @@ body {
 .nav-button {
   padding: 7px 40px;
   font-size: 12px;
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* mint accent */
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -106,7 +105,7 @@ body {
   margin: auto;
   width: 50%;
   line-height: 2;
-  color: #a0aec0;
+  color: #a0aec0; /* muted UI text */
   font-weight: lighter;
   margin-top: 20px;
 }
@@ -165,20 +164,20 @@ body {
 /* Image box */
 .image-box {
   width: 90%;
-  height: 972px;
+  height: 972px; /* fixed height to maintain size */
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #4fd1c5;
+  border: 2px solid #4fd1c5; /* UI accent border */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: relative; /* stack images for crossfade */
   margin-bottom: 100px;
 }
 
 /* Fade animation */
 .fade-image {
-  position: absolute;
+  position: absolute; /* stack on top of each other */
   top: 0;
   left: 0;
   width: 100%;
@@ -186,11 +185,11 @@ body {
   object-fit: cover;
   border-radius: 12px;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s ease-in-out; /* smooth fade */
 }
 
 .fade-image.active {
-  opacity: 1;
+  opacity: 1; /* visible image */
 }
 
 .try {
@@ -273,29 +272,31 @@ body {
 }
 
 /* ------------------ CUSTOM SCROLLBAR (GLOBAL) ------------------ */
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f2027;
+  background: #0f2027; /* matches page background */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* accent color */
   border-radius: 10px;
-  border: 3px solid #0f2027;
+  border: 3px solid #0f2027; /* space around thumb */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #38b2ac;
+  background-color: #38b2ac; /* darker shade on hover */
 }
 
+/* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #4fd1c5 transparent;
+  scrollbar-color: #4fd1c5 transparent; /* thumb color, track color */
 }
 
 /* --- SCROLL REVEAL --- */
@@ -315,173 +316,4 @@ html {
   border: none;
   border-top: 1px solid #4fd1c5;
   margin: 0;
-}
-
-/* ================= MOBILE (max-width: 768px) ================= */
-@media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden;
-    max-width: 100vw;
-  }
-
-  .home-page {
-    overflow-x: hidden;
-    max-width: 100vw;
-  }
-
-  .home-header {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 10px;
-    padding: 12px 5%;
-  }
-
-  .title {
-    font-size: 18px;
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .webscript-button-wrapper {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-  }
-
-  .webscript-button {
-    width: auto;
-    padding: 8px 16px;
-    font-size: 12px;
-  }
-
-  .nav-buttons {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: center;
-    gap: 8px;
-  }
-
-  .nav-button {
-    padding: 6px 16px;
-    font-size: 11px;
-  }
-
-  .home-content1 h2 {
-    font-size: 28px;
-    width: 88%;
-    margin: 40px auto 10px auto;
-    line-height: 1.4;
-  }
-
-  .home-content2 h3,
-  .home-content3 h3 {
-    font-size: 15px;
-    width: 88%;
-  }
-
-  .center-button {
-    margin: 30px auto 60px auto;
-  }
-
-  .testing-button {
-    font-size: 14px;
-    height: 44px;
-    padding: 8px 24px;
-    margin-bottom: 0;
-  }
-
-  .home-content4 h3 {
-    font-size: 18px;
-    width: 88%;
-    margin: 40px auto 20px auto;
-  }
-
-  .image-box {
-    height: 220px;
-    margin-bottom: 30px;
-  }
-
-  .try {
-    margin-bottom: 40px;
-    text-align: center;
-  }
-
-  .try h3 {
-    font-size: 26px;
-    width: 88%;
-  }
-
-  .trybutton {
-    margin-left: 0;
-    margin-bottom: 40px;
-  }
-
-  .AboutUs {
-    width: 88%;
-    height: auto;
-    border-radius: 20px;
-    padding: 24px 20px;
-    overflow: visible;
-  }
-
-  .home-content-about h3 {
-    font-size: 20px;
-    width: 88%;
-  }
-
-  .home-content-about p {
-    font-size: 15px;
-    width: 90%;
-    margin: 10px auto;
-  }
-}
-
-/* ================= SMALL MOBILE (max-width: 480px) ================= */
-@media (max-width: 480px) {
-  .home-content1 h2 {
-    font-size: 22px;
-    width: 92%;
-  }
-
-  .home-content2 h3,
-  .home-content3 h3 {
-    font-size: 13px;
-    width: 92%;
-  }
-
-  .home-content4 h3 {
-    font-size: 16px;
-    width: 92%;
-  }
-
-  .try h3 {
-    font-size: 20px;
-    width: 92%;
-  }
-
-  .image-box {
-    height: 180px;
-  }
-
-  .nav-button {
-    padding: 5px 12px;
-    font-size: 10px;
-  }
-
-  .title {
-    font-size: 15px;
-  }
-
-  .webscript-button {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-
-  .AboutUs {
-    width: 92%;
-  }
-
-  .home-content-about p {
-    font-size: 13px;
-  }
 }
