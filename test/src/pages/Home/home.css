@@ -1,6 +1,6 @@
 .home-page {
   min-height: 100vh;
-  background-color: #0f2027;
+  background-color: #0f2027; /* dark UI background */
   color: white;
   font-family: "Inter", sans-serif;
 }
@@ -10,25 +10,28 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow-x: hidden;
+  overflow-x: hidden; /* FIX 1: was 'auto' — breaks position: sticky */
   overflow-y: auto;
   background-color: #0f2027;
 }
 
+/* Header — flex for true single-row alignment */
 .home-header {
-  display: flex;
+  display: flex; /* FIX 2: was grid — flex keeps all items on one row */
   align-items: center;
   justify-content: space-between;
   padding: 0 5%;
   height: 64px;
   position: sticky;
   top: 0;
-  background-color: #203a43;
+  background-color: #203a43; /* UI header color */
   z-index: 1000;
   width: 100%;
   box-sizing: border-box;
+  height: 70px;
 }
 
+/* Title stays left */
 .title {
   font-size: 24px;
   margin: 0;
@@ -41,6 +44,7 @@ body {
   width: auto;
 }
 
+/* Center nav buttons */
 .nav-buttons {
   display: flex;
   gap: 15px;
@@ -50,7 +54,7 @@ body {
 .nav-button {
   padding: 7px 40px;
   font-size: 12px;
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* mint accent */
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -91,6 +95,7 @@ body {
   box-shadow: 0 6px 15px rgba(34, 197, 94, 0.5);
 }
 
+/* Centered text */
 .home-content1 h2 {
   text-align: center;
   margin: 75px auto 10px auto;
@@ -105,11 +110,12 @@ body {
   margin: auto;
   width: 50%;
   line-height: 2;
-  color: #a0aec0;
+  color: #a0aec0; /* muted UI text */
   font-weight: lighter;
   margin-top: 20px;
 }
 
+/* Centered "Start Testing Now" button */
 .center-button {
   display: flex;
   justify-content: center;
@@ -129,7 +135,7 @@ body {
   transition: 0.2s;
   height: 50px;
   margin-bottom: 200px;
-  text-decoration: none;
+  text-decoration: none; /* FIX 3: remove underline from <Link> wrapper */
 }
 
 .testing-button:hover {
@@ -147,11 +153,13 @@ body {
   font-weight: normal;
 }
 
+/* Offset sticky header when scrolling to Features and About sections */
 .home-content4,
 .home-content-about {
   scroll-margin-top: 70px;
 }
 
+/* Image section */
 .image-section {
   display: flex;
   justify-content: center;
@@ -159,21 +167,23 @@ body {
   width: 100%;
 }
 
+/* Image box */
 .image-box {
   width: 90%;
-  height: 972px;
+  height: 972px; /* fixed height to maintain size */
   border-radius: 12px;
   overflow: hidden;
-  border: 2px solid #4fd1c5;
+  border: 2px solid #4fd1c5; /* UI accent border */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  position: relative; /* stack images for crossfade */
   margin-bottom: 100px;
 }
 
+/* Fade animation */
 .fade-image {
-  position: absolute;
+  position: absolute; /* stack on top of each other */
   top: 0;
   left: 0;
   width: 100%;
@@ -181,11 +191,11 @@ body {
   object-fit: cover;
   border-radius: 12px;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 1.5s ease-in-out; /* smooth fade */
 }
 
 .fade-image.active {
-  opacity: 1;
+  opacity: 1; /* visible image */
 }
 
 .try {
@@ -214,7 +224,7 @@ body {
   height: 50px;
   margin-left: 480px;
   margin-bottom: 100px;
-  text-decoration: none;
+  text-decoration: none; /* FIX 3: remove underline from <Link> wrapper */
 }
 
 .trybutton:hover {
@@ -230,6 +240,7 @@ body {
   background-color: #0f2027;
 }
 
+/* --- ABOUT SECTION --- */
 .home-content-about h3 {
   text-align: center;
   margin: 10px auto 40px auto;
@@ -267,31 +278,35 @@ body {
   font-weight: normal;
 }
 
+/* ------------------ CUSTOM SCROLLBAR (GLOBAL) ------------------ */
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f2027;
+  background: #0f2027; /* matches page background */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #4fd1c5;
+  background-color: #4fd1c5; /* accent color */
   border-radius: 10px;
-  border: 3px solid #0f2027;
+  border: 3px solid #0f2027; /* space around thumb */
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #38b2ac;
+  background-color: #38b2ac; /* darker shade on hover */
 }
 
+/* Firefox */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #4fd1c5 transparent;
+  scrollbar-color: #4fd1c5 transparent; /* thumb color, track color */
 }
 
+/* --- SCROLL REVEAL --- */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -303,6 +318,7 @@ html {
   transform: translateY(0);
 }
 
+/* --- DIVIDER --- */
 .divider {
   border: none;
   border-top: 1px solid #4fd1c5;
@@ -318,13 +334,14 @@ html {
     gap: 8px;
   }
 
-  .title { font-size: 16px; }
+  .title { font-size: 16px; white-space: nowrap; }
 
   .nav-buttons { gap: 6px; }
 
   .nav-button {
     padding: 5px 14px;
     font-size: 10px;
+    white-space: nowrap;
   }
 
   .webscript-button {
@@ -348,13 +365,14 @@ html {
     margin-top: 15px;
   }
 
+  /* Fix the 200px dead space */
   .center-button { margin: 40px auto 60px auto; }
 
   .testing-button {
     font-size: 14px;
     padding: 10px 24px;
     height: auto;
-    margin-bottom: 0;
+    margin-bottom: 0; /* remove the 200px baked in */
   }
 
   .home-content4 h3 {
@@ -363,6 +381,7 @@ html {
     margin: 40px auto 25px auto;
   }
 
+  /* Fix the 972px fixed height */
   .image-box {
     height: 260px;
     width: 92%;
@@ -372,6 +391,7 @@ html {
 
   .home-content-about h3 { font-size: 20px; width: 85%; }
 
+  /* Fix clipping height */
   .AboutUs {
     width: 85%;
     height: auto;
@@ -389,6 +409,7 @@ html {
 
   .try h3 { font-size: 28px; width: 85%; text-align: center; }
 
+  /* Fix the 480px hardcoded margin-left */
   .trybutton {
     margin-left: 0;
     display: block;
@@ -404,8 +425,8 @@ html {
 /* --- SMALL MOBILE (max-width: 480px) --- */
 @media (max-width: 480px) {
 
+  /* stays flex row — no flex-direction: column */
   .home-header {
-    /* stays flex row — NO flex-direction: column */
     padding: 0 3%;
     height: 56px;
     gap: 6px;
@@ -416,11 +437,11 @@ html {
     flex-shrink: 0;
   }
 
+  /* fills space between title and login button — no width: 100% */
   .nav-buttons {
     flex: 1;
     justify-content: center;
     gap: 4px;
-    /* NO width: 100% — that was forcing a new row */
   }
 
   .nav-button {
@@ -429,7 +450,9 @@ html {
   }
 
   .webscript-button-wrapper {
+    position: static;
     flex-shrink: 0;
+    margin-top: 0;
   }
 
   .webscript-button {
