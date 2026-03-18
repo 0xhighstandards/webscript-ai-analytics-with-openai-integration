@@ -92,17 +92,20 @@ function UserUI() {
     const userMessages = allMessages.filter((m) => m.role === "user");
     const totalAnalyses = userMessages.length;
 
-    // Language counts from stored language metadata
     const languageCounts = {};
     chats.forEach((chat) => {
       (chat.languages || []).forEach((lang) => {
-        if (lang && lang !== "Unknown" && lang !== "Not a valid script") {
+        if (
+          lang &&
+          lang !== "Unknown" &&
+          lang !== "Not a valid script" &&
+          lang !== "Not a valid programming script."
+        ) {
           languageCounts[lang] = (languageCounts[lang] || 0) + 1;
         }
       });
     });
 
-    // Analyses per day of week
     const dayCounts = { Sun: 0, Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0 };
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     chats.forEach((chat) => {
@@ -112,7 +115,6 @@ function UserUI() {
       }
     });
 
-    // Analyses over time (last 7 chats)
     const recentChats = [...chats]
       .filter((c) => c.createdAt)
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
@@ -147,6 +149,7 @@ function UserUI() {
       if (donutChartRef.current) {
         const langLabels = Object.keys(analytics.languageCounts);
         const langData = Object.values(analytics.languageCounts);
+        const isSingle = langLabels.length <= 1;
 
         const palette = [
           "#4fd1c5", "#38b2ac", "#0f6e56", "#22c55e",
@@ -162,8 +165,9 @@ function UserUI() {
               backgroundColor: langLabels.length > 0
                 ? palette.slice(0, langLabels.length)
                 : ["rgba(255,255,255,0.05)"],
-              borderWidth: 0,
-              borderRadius: 4,
+              borderWidth: isSingle ? 0 : 2,
+              borderColor: "#203a43",
+              borderRadius: isSingle ? 0 : 4,
             }],
           },
           options: {
@@ -172,12 +176,24 @@ function UserUI() {
             plugins: {
               legend: {
                 display: true,
-                position: "right",
+                position: "bottom",
                 labels: {
-                  color: labelColor,
-                  font: commonFont,
+                  color: "#cbd5f5",
+                  font: { family: "'Inter', sans-serif", size: 12 },
                   boxWidth: 12,
-                  padding: 10,
+                  padding: 16,
+                  generateLabels: (chart) => {
+                    return chart.data.labels.map((label, i) => ({
+                      text: label.length > 25 ? label.slice(0, 25) + "…" : label,
+                      fillStyle: chart.data.datasets[0].backgroundColor[i],
+                      strokeStyle: "transparent",
+                      hidden: false,
+                      index: i,
+                      // Chart.js 4.x uses these:
+                      fontColor: "#cbd5f5",
+                      color: "#cbd5f5",
+                    }));
+                  },
                 },
               },
               tooltip: {
@@ -338,7 +354,12 @@ function UserUI() {
       const data = await response.json();
       const assistantMessage = { role: "assistant", content: data.result };
       const finalMessages = [...updatedMessages, assistantMessage];
+
       const detectedLanguage = data.language || "Unknown";
+      const isValidLanguage =
+        detectedLanguage !== "Unknown" &&
+        detectedLanguage !== "Not a valid script" &&
+        detectedLanguage !== "Not a valid programming script.";
 
       setMessages(finalMessages);
       setChats((prev) =>
@@ -347,7 +368,9 @@ function UserUI() {
             ? {
                 ...chat,
                 messages: finalMessages,
-                languages: [...(chat.languages || []), detectedLanguage],
+                languages: isValidLanguage
+                  ? [...(chat.languages || []), detectedLanguage]
+                  : chat.languages || [],
                 title: chat.title === "New Chat" ? currentScript.slice(0, 20) + "..." : chat.title,
               }
             : chat
@@ -511,7 +534,6 @@ function UserUI() {
           <div className="analytics-modal" onClick={(e) => e.stopPropagation()}>
             <h2>Your Analytics</h2>
 
-            {/* ROW 1 — Language Donut (centered, standalone) */}
             <div className="analytics-row analytics-row-center">
               <div className="analytics-section analytics-section-donut">
                 <p className="analytics-section-title">Most Used Languages</p>
@@ -527,7 +549,6 @@ function UserUI() {
               </div>
             </div>
 
-            {/* ROW 2 — Line + Bar side by side */}
             <div className="analytics-row analytics-row-split">
               <div className="analytics-section analytics-section-half">
                 <p className="analytics-section-title">Analyses Over Time</p>

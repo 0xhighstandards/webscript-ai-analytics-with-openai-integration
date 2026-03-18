@@ -579,7 +579,6 @@
   letter-spacing: 0.5px;
 }
 
-/* Row 1 — Donut centered */
 .analytics-row {
   display: flex;
   gap: 20px;
@@ -590,7 +589,6 @@
   justify-content: center;
 }
 
-/* Row 2 — Line + Bar side by side */
 .analytics-row-split {
   align-items: stretch;
 }
@@ -602,6 +600,7 @@
 
 .analytics-section-donut {
   align-items: center;
+  width: 100%;
 }
 
 .analytics-section-half {
@@ -626,11 +625,18 @@
   flex: 1;
 }
 
-/* Donut */
+/* Donut — transparent, no border, full width */
 .analytics-donut-wrap {
   position: relative;
-  width: 300px;
-  height: 180px;
+  width: 100%;
+  max-width: 380px;
+  min-height: 260px;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .analytics-donut-label {
@@ -654,6 +660,12 @@
   font-size: 12px;
   color: #94a3b8;
   margin-top: 4px;
+}
+
+/* Force Chart.js legend text color */
+.analytics-donut-wrap canvas,
+.analytics-chart-wrap canvas {
+  color: #cbd5f5 !important;
 }
 
 /* Close Button */
