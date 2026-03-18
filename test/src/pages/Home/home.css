@@ -336,8 +336,6 @@ html {
 
   .title { font-size: 16px; white-space: nowrap; }
 
-  .nav-buttons { gap: 6px; }
-
   .nav-button {
     padding: 5px 14px;
     font-size: 10px;
