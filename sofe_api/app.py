@@ -105,7 +105,8 @@ Input:
                 "messages": [
                     {"role": "user", "content": ai_prompt}
                 ]
-            }
+            },
+            timeout=(10, 90)
         )
 
         if response.status_code != 200:
@@ -116,24 +117,35 @@ Input:
         response_data = response.json()
         ai_output = response_data["choices"][0]["message"]["content"]
 
-        # Extract language from response for frontend use
+        # Extract language from AI response
         language = "Unknown"
         is_valid_script = True
+        lines = ai_output.split("\n")
 
-        for line in ai_output.split("\n"):
+        for i, line in enumerate(lines):
             if "Not a valid programming script" in line:
                 is_valid_script = False
                 language = "Not a valid script"
                 break
-            elif "Detected Language:" in line:
-                language = line.replace("-", "").replace("**Detected Language:**", "").replace("**", "").strip()
+            if "## Language:" in line:
+                # Language value is on the next non-empty line
+                for next_line in lines[i + 1:]:
+                    if next_line.strip():
+                        language = next_line.replace("-", "").replace("**", "").strip()
+                        break
                 break
+
+        print(f"Detected language: {language}")
 
         return jsonify({
             "result": ai_output,
             "language": language,
             "is_valid_script": is_valid_script
         })
+
+    except requests.exceptions.Timeout:
+        print("Request to OpenRouter timed out")
+        return jsonify({"error": "Analysis timed out. Please try again."}), 504
 
     except Exception as e:
         print(f"Error: {type(e).__name__}: {str(e)}")
