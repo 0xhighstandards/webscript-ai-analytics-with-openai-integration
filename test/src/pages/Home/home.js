@@ -141,7 +141,7 @@ function Home() {
 
       {/* --- CTA SECTION --- */}
       <div className="center-button reveal">
-        <Link to="/guest">
+        <Link to="/guest" style={{ textDecoration: "none" }}>
           <button className="testing-button">Start Testing Now</button>
         </Link>
       </div>
@@ -215,7 +215,7 @@ function Home() {
       {/* --- FOOTER CTA --- */}
       <div className="try reveal">
         <h3>Join us and learn more about Webscript AI Analytics.</h3>
-        <Link to="/guest">
+        <Link to="/guest" style={{ textDecoration: "none" }}>
           <button className="trybutton">Try Webscript AI Now</button>
         </Link>
       </div>

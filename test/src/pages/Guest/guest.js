@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+// render markdown returned by the API in guest mode as well
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
@@ -17,7 +18,6 @@ function Guest() {
   const [pageLoading, setPageLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile sidebar
 
   const textareaRef = useRef(null);
   const messageEndRef = useRef(null);
@@ -97,26 +97,14 @@ function Guest() {
       {/* --- PAGE LOADER --- */}
       <PageLoader visible={pageLoading} />
 
-      {/* --- MOBILE BACKDROP --- */}
-      <div
-        className={`sidebar-backdrop ${sidebarOpen ? "visible" : ""}`}
-        onClick={() => setSidebarOpen(false)}
-      />
-
-      {/* --- SIDEBAR --- */}
-      <aside
-        className={`sidebar ${collapsed ? "collapsed" : ""} ${sidebarOpen ? "mobile-open" : ""}`}
-      >
+      <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           <Link to="/" className="logo">
             WebScript AI
           </Link>
           <button
             className="collapse-btn"
-            onClick={() => {
-              setCollapsed(!collapsed);
-              setSidebarOpen(false); // close on mobile when collapsing
-            }}
+            onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? "➤" : "◀"}
           </button>
@@ -133,21 +121,7 @@ function Guest() {
         )}
       </aside>
 
-      {/* --- MAIN CHAT AREA --- */}
       <main className="chat-area">
-
-        {/* Top bar with hamburger for mobile */}
-        <div className="top-bar">
-          <button
-            className="mobile-menu-btn"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-          >
-            ☰
-          </button>
-          <span className="username">Guest</span>
-        </div>
-
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <div key={index} className={`chat-message ${msg.role}`}>
