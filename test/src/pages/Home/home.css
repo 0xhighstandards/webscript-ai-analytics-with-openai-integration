@@ -318,30 +318,18 @@ html {
   margin: 0;
 }
 
-
-/* ==============================================
-   MOBILE RESPONSIVE
-   ============================================== */
-
 /* --- TABLET (max-width: 768px) --- */
 @media (max-width: 768px) {
 
-  /* ── HEADER: keep horizontal nav, compress columns ── */
   .home-header {
     grid-template-columns: auto 1fr auto;
     padding: 10px 3%;
     gap: 8px;
   }
 
-  .title {
-    font-size: 16px;
-    white-space: nowrap;
-  }
+  .title { font-size: 16px; white-space: nowrap; }
 
-  .nav-buttons {
-    justify-self: center;
-    gap: 6px;
-  }
+  .nav-buttons { justify-self: center; gap: 6px; }
 
   .nav-button {
     padding: 5px 14px;
@@ -356,7 +344,6 @@ html {
     height: 36px;
   }
 
-  /* ── HERO TEXT ── */
   .home-content1 h2 {
     font-size: 28px;
     width: 88%;
@@ -371,26 +358,23 @@ html {
     margin-top: 15px;
   }
 
-  /* ── CTA BUTTON ── */
-  .center-button {
-    margin: 40px auto 80px auto;
-  }
+  /* Fix the 200px dead space */
+  .center-button { margin: 40px auto 60px auto; }
 
   .testing-button {
     font-size: 14px;
     padding: 10px 24px;
     height: auto;
-    margin-bottom: 80px;
+    margin-bottom: 0; /* remove the 200px baked in */
   }
 
-  /* ── FEATURES HEADING ── */
   .home-content4 h3 {
     font-size: 18px;
     width: 85%;
     margin: 40px auto 25px auto;
   }
 
-  /* ── IMAGE BOX: replace fixed 972px height ── */
+  /* Fix the 972px fixed height */
   .image-box {
     height: 260px;
     width: 92%;
@@ -398,16 +382,13 @@ html {
     margin-bottom: 50px;
   }
 
-  /* ── ABOUT HEADING ── */
-  .home-content-about h3 {
-    font-size: 20px;
-    width: 85%;
-  }
+  .home-content-about h3 { font-size: 20px; width: 85%; }
 
-  /* ── ABOUT BOX: remove fixed height that clips content ── */
+  /* Fix clipping height */
   .AboutUs {
     width: 85%;
     height: auto;
+    min-height: unset;
     border-radius: 24px;
     padding: 30px 20px;
     margin-bottom: 60px;
@@ -419,13 +400,9 @@ html {
     line-height: 1.8;
   }
 
-  /* ── FOOTER CTA: fix hardcoded margin-left: 480px ── */
-  .try h3 {
-    font-size: 28px;
-    width: 85%;
-    text-align: center;
-  }
+  .try h3 { font-size: 28px; width: 85%; text-align: center; }
 
+  /* Fix the 480px hardcoded margin-left */
   .trybutton {
     margin-left: 0;
     display: block;
@@ -435,36 +412,34 @@ html {
     padding: 12px 28px;
   }
 
-  .footer {
-    font-size: 12px;
-    padding: 16px 10px;
-  }
+  .footer { font-size: 12px; padding: 16px 10px; }
 }
 
 /* --- SMALL MOBILE (max-width: 480px) --- */
 @media (max-width: 480px) {
 
-  /* ── HEADER: two-row layout — logo+login on top, nav pills below ── */
   .home-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
     padding: 10px 4%;
+    /* Remove position: relative if not already set — needed for absolute child */
+    position: relative;
   }
 
-  .title {
-    font-size: 15px;
-    align-self: flex-start;
-  }
+  /* Row 1: title left, button right */
+  .home-header > :first-child { align-self: flex-start; }
 
+  .title { font-size: 15px; align-self: flex-start; }
+
+  /* Keep button in flow — don't use position: absolute */
   .webscript-button-wrapper {
-    position: absolute;
-    right: 4%;
-    top: 10px;
+    position: static; /* FIX: was absolute, causing overlap */
+    align-self: flex-end;
+    margin-top: -36px; /* pull up to sit beside title */
   }
 
-  /* Nav pills: still horizontal, centered below */
   .nav-buttons {
     display: flex;
     flex-direction: row;
@@ -473,11 +448,7 @@ html {
     width: 100%;
   }
 
-  .nav-button {
-    padding: 4px 12px;
-    font-size: 9px;
-    white-space: nowrap;
-  }
+  .nav-button { padding: 4px 12px; font-size: 9px; white-space: nowrap; }
 
   .webscript-button {
     width: 85px;
@@ -486,7 +457,6 @@ html {
     padding: 5px 8px;
   }
 
-  /* ── HERO ── */
   .home-content1 h2 {
     font-size: 22px;
     width: 92%;
@@ -495,53 +465,36 @@ html {
   }
 
   .home-content2 h3,
-  .home-content3 h3 {
-    font-size: 13px;
-    width: 90%;
-  }
+  .home-content3 h3 { font-size: 13px; width: 90%; }
 
   .testing-button {
     font-size: 13px;
     padding: 9px 20px;
-    margin-bottom: 60px;
+    margin-bottom: 0;
   }
 
-  /* ── FEATURES ── */
-  .home-content4 h3 {
-    font-size: 15px;
-    width: 90%;
-  }
+  .home-content4 h3 { font-size: 15px; width: 90%; }
 
-  /* ── IMAGES ── */
-  .image-box {
-    height: 200px;
-    width: 94%;
-  }
+  .image-box { height: 200px; width: 94%; }
 
-  /* ── ABOUT ── */
   .AboutUs {
     width: 90%;
+    height: auto;
     border-radius: 16px;
     padding: 24px 16px;
   }
 
-  .home-content-about p {
-    font-size: 13px;
-    width: 95%;
-  }
+  .home-content-about p { font-size: 13px; width: 95%; }
 
-  /* ── FOOTER CTA ── */
-  .try h3 {
-    font-size: 20px;
-    width: 90%;
-  }
+  .try h3 { font-size: 20px; width: 90%; }
 
   .trybutton {
+    margin-left: 0;
+    display: block;
+    margin: 0 auto 60px auto;
     font-size: 13px;
     padding: 10px 22px;
   }
 
-  .footer {
-    font-size: 11px;
-  }
+  .footer { font-size: 11px; }
 }
