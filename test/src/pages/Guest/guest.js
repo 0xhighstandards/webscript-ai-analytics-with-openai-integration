@@ -77,7 +77,7 @@ function Guest() {
         {
           role: "assistant",
           content:
-            "⚠️ Connection Error. Please ensure the Flask server is running.",
+            "⚠️ Connection Error. Please ensure the internal server is running.",
         },
       ]);
     } finally {
