@@ -379,7 +379,7 @@ function UserUI() {
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ Connection Error. Is your Flask server running?" },
+        { role: "assistant", content: "⚠️ Connection Error. Is your internal server running?" },
       ]);
     } finally {
       setLoading(false);
