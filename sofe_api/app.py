@@ -1,7 +1,7 @@
 from gevent import monkey
 monkey.patch_all()
 
-from flask import Flask, request, jsonify, send_file, Response, stream_with_context
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import requests
 import json
@@ -23,9 +23,10 @@ CORS(app)
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 # ─── CONFIG ───────────────────────────────────────────────
-CHUNK_SIZE    = 80_000   # bigger chunks = fewer API calls
-MAX_SIZE      = 500_000  # hard limit: 500KB
+CHUNK_SIZE    = 800_000  # ~200k tokens, well within free tier limit
+MAX_SIZE      = 800_000  # hard reject anything over 800KB
 PARALLEL_POOL = 5        # concurrent gevent workers
+MAX_RETRIES   = 3        # retry failed chunks up to 3 times
 # ──────────────────────────────────────────────────────────
 
 
@@ -37,7 +38,7 @@ def chunk_script(script, chunk_size=CHUNK_SIZE):
     current_size = 0
 
     for line in lines:
-        line_len = len(line) + 1  # +1 for the newline character
+        line_len = len(line) + 1  # +1 for newline
         if current_size + line_len > chunk_size and current_chunk:
             chunks.append("\n".join(current_chunk))
             current_chunk = [line]
@@ -115,38 +116,55 @@ Input:
 
 
 def call_openrouter(chunk, index, total):
-    """Call OpenRouter API for a single chunk. Returns (index, result_text) or (index, None)."""
-    print(f"Analyzing chunk {index + 1}/{total}...")
-    try:
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "nvidia/nemotron-3-super-120b-a12b:free",
-                "messages": [{"role": "user", "content": build_prompt(chunk)}],
-                "max_tokens": 4096,
-                "temperature": 0.1,
-            },
-            timeout=(10, 120),  # reduced timeout: 10s connect, 120s read
-        )
+    """Call OpenRouter API for a single chunk with retry logic."""
+    for attempt in range(MAX_RETRIES):
+        try:
+            if attempt > 0:
+                wait = 2 ** attempt  # 2s, 4s backoff
+                print(f"Chunk {index + 1}: retry {attempt}/{MAX_RETRIES - 1} after {wait}s...")
+                gevent.sleep(wait)
 
-        if response.status_code != 200:
-            print(f"OpenRouter error on chunk {index + 1}: {response.status_code} - {response.text}")
-            return (index, None)
+            print(f"Analyzing chunk {index + 1}/{total} (attempt {attempt + 1})...")
 
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        return (index, content if content else None)
+            response = requests.post(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                    "messages": [{"role": "user", "content": build_prompt(chunk)}],
+                    "max_tokens": 2048,   # lowered: reduces response time significantly
+                    "temperature": 0.1,
+                },
+                timeout=(10, 120),        # 10s connect, 120s read (was 570s)
+            )
 
-    except requests.exceptions.Timeout:
-        print(f"Chunk {index + 1} timed out")
-        return (index, None)
-    except Exception as e:
-        print(f"Chunk {index + 1} error: {e}")
-        return (index, None)
+            if response.status_code == 200:
+                data = response.json()
+                content = data["choices"][0]["message"]["content"]
+                if content:
+                    return (index, content)
+                print(f"Chunk {index + 1} returned empty content, retrying...")
+
+            elif response.status_code in (429, 500, 502, 503):
+                # Rate limited or server error — retry
+                print(f"Chunk {index + 1} got {response.status_code}, retrying...")
+                continue
+
+            else:
+                # 400 or other non-retryable error
+                print(f"Chunk {index + 1} error {response.status_code}: {response.text}")
+                return (index, None)
+
+        except requests.exceptions.Timeout:
+            print(f"Chunk {index + 1} timed out on attempt {attempt + 1}")
+        except Exception as e:
+            print(f"Chunk {index + 1} exception: {type(e).__name__}: {e}")
+
+    print(f"Chunk {index + 1} failed after {MAX_RETRIES} attempts")
+    return (index, None)
 
 
 @app.route("/")
@@ -165,10 +183,10 @@ def analyze():
     if not OPENROUTER_API_KEY:
         return jsonify({"error": "OPENROUTER_API_KEY not configured"}), 500
 
-    # ── Hard size limit ──────────────────────────────────────
+    # Hard size limit — reject early instead of hanging
     if len(script) > MAX_SIZE:
         return jsonify({
-            "error": f"Script too large ({len(script):,} chars). Maximum allowed is {MAX_SIZE:,} characters."
+            "error": f"Script too large ({len(script):,} chars). Maximum is {MAX_SIZE:,} characters."
         }), 413
 
     print(f"Script size: {len(script):,} characters")
@@ -177,23 +195,24 @@ def analyze():
         chunks = chunk_script(script)
         print(f"Split into {len(chunks)} chunk(s)")
 
-        # ── Parallel processing with gevent ─────────────────
+        # ── Fire all chunks in parallel ──────────────────────
         pool = Pool(PARALLEL_POOL)
         jobs = [
             pool.spawn(call_openrouter, chunk, i, len(chunks))
             for i, chunk in enumerate(chunks)
         ]
-        gevent.joinall(jobs, timeout=150)  # wait max 150s for all chunks
+        gevent.joinall(jobs, timeout=150)  # max 150s total wait
 
-        # Collect results in original order
+        # Collect and sort results by original chunk order
         raw_results = [job.value for job in jobs if job.value is not None]
-        ordered = sorted(raw_results, key=lambda x: x[0])  # sort by chunk index
+        ordered = sorted(raw_results, key=lambda x: x[0])
         all_results = [text for _, text in ordered if text]
 
         if not all_results:
+            print("All chunks returned empty responses")
             return jsonify({"error": "AI returned an empty response. Please try again."}), 500
 
-        # ── Detect language from first valid result ──────────
+        # ── Detect language from first result ────────────────
         language = "Unknown"
         is_valid_script = True
 
@@ -232,59 +251,6 @@ def analyze():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Analysis failed", "details": str(e)}), 500
-
-
-# ── Streaming endpoint (optional — use for real-time UI feedback) ──
-@app.route("/analyze/stream", methods=["POST"])
-def analyze_stream():
-    """
-    Streams partial results back to the client as each chunk finishes.
-    Frontend can listen with EventSource or fetch + ReadableStream.
-    """
-    data = request.get_json()
-    if not data or "script" not in data:
-        return jsonify({"error": "No script provided"}), 400
-
-    script = data["script"]
-
-    if not OPENROUTER_API_KEY:
-        return jsonify({"error": "OPENROUTER_API_KEY not configured"}), 500
-
-    if len(script) > MAX_SIZE:
-        return jsonify({"error": f"Script too large. Max {MAX_SIZE:,} chars."}), 413
-
-    chunks = chunk_script(script)
-
-    def generate():
-        pool = Pool(PARALLEL_POOL)
-        jobs = [pool.spawn(call_openrouter, chunk, i, len(chunks)) for i, chunk in enumerate(chunks)]
-
-        completed = set()
-        while len(completed) < len(jobs):
-            for idx, job in enumerate(jobs):
-                if idx not in completed and job.ready():
-                    completed.add(idx)
-                    result = job.value
-                    if result:
-                        _, text = result
-                        payload = json.dumps({
-                            "chunk_index": idx,
-                            "total_chunks": len(chunks),
-                            "text": text,
-                        })
-                        yield f"data: {payload}\n\n"
-            gevent.sleep(0.1)  # small poll interval
-
-        yield "data: [DONE]\n\n"
-
-    return Response(
-        stream_with_context(generate()),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
-    )
 
 
 if __name__ == "__main__":
