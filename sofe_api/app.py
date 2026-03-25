@@ -125,7 +125,7 @@ def call_openrouter(chunk, index, total):
                 "Content-Type": "application/json",
             },
             json={
-                "model": "nvidia/nemotron-super-49b-v1:free",  # faster model
+                "model": "nvidia/nemotron-3-super-120b-a12b:free",
                 "messages": [{"role": "user", "content": build_prompt(chunk)}],
                 "max_tokens": 4096,
                 "temperature": 0.1,
