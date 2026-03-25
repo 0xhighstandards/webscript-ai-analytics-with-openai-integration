@@ -123,6 +123,10 @@ Input:
         response_data = response.json()
         ai_output = response_data["choices"][0]["message"]["content"]
 
+        if not ai_output:
+            print("AI returned empty response")
+            return jsonify({"error": "AI returned an empty response. Please try again."}), 500
+
         # Extract language from AI response
         language = "Unknown"
         is_valid_script = True
