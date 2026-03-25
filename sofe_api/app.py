@@ -1,16 +1,16 @@
 from gevent import monkey
 monkey.patch_all()
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response, stream_with_context
 from flask_cors import CORS
 import requests
 import json
 import os
 import sys
 import gevent
-from dotenv import load_dotenv  
+from gevent.pool import Pool
+from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 print(f"Python version: {sys.version}")
 print(f"Current working directory: {os.getcwd()}")
@@ -20,59 +20,40 @@ print(f"gevent version: {gevent.__version__}")
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-# OpenRouter API configuration
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-def chunk_script(script, chunk_size=10000):
-    """Split script into chunks without breaking lines"""
+# ─── CONFIG ───────────────────────────────────────────────
+CHUNK_SIZE    = 80_000   # bigger chunks = fewer API calls
+MAX_SIZE      = 500_000  # hard limit: 500KB
+PARALLEL_POOL = 5        # concurrent gevent workers
+# ──────────────────────────────────────────────────────────
+
+
+def chunk_script(script, chunk_size=CHUNK_SIZE):
+    """Split script into chunks without breaking lines."""
     lines = script.split("\n")
     chunks = []
     current_chunk = []
     current_size = 0
 
     for line in lines:
-        if current_size + len(line) > chunk_size and current_chunk:
+        line_len = len(line) + 1  # +1 for the newline character
+        if current_size + line_len > chunk_size and current_chunk:
             chunks.append("\n".join(current_chunk))
             current_chunk = [line]
-            current_size = len(line)
+            current_size = line_len
         else:
             current_chunk.append(line)
-            current_size += len(line)
+            current_size += line_len
 
     if current_chunk:
         chunks.append("\n".join(current_chunk))
 
     return chunks
 
-@app.route("/")
-def index():
-    return send_file("index.html")
 
-@app.route("/analyze", methods=["POST"])
-def analyze():
-    data = request.get_json()
-    if not data or "script" not in data:
-        return jsonify({"error": "No script provided"}), 400
-
-    script = data["script"]
-
-    if not OPENROUTER_API_KEY:
-        return jsonify({"error": "OPENROUTER_API_KEY not configured"}), 500
-
-    print(f"Script size: {len(script)} characters")
-
-    try:
-        chunks = chunk_script(script)
-        print(f"Split into {len(chunks)} chunk(s)")
-
-        all_results = []
-        language = "Unknown"
-        is_valid_script = True
-
-        for i, chunk in enumerate(chunks):
-            print(f"Analyzing chunk {i+1}/{len(chunks)}...")
-
-            ai_prompt = f"""
+def build_prompt(chunk):
+    return f"""
 You are an AI Web Script Analyzer. Your FIRST task is to determine whether the input is actually a valid programming script or code.
 
 ## STEP 1 - VALIDATION:
@@ -132,81 +113,179 @@ Input:
 {chunk}
 """
 
-            response = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "nvidia/nemotron-3-super-120b-a12b:free",
-                    "messages": [
-                        {"role": "user", "content": ai_prompt}
-                    ],
-                    "max_tokens": 4096,
-                    "temperature": 0.1
-                },
-                timeout=(10, 570)
-            )
 
-            if response.status_code != 200:
-                error_msg = response.text
-                print(f"OpenRouter error on chunk {i+1}: {response.status_code} - {error_msg}")
-                continue
+def call_openrouter(chunk, index, total):
+    """Call OpenRouter API for a single chunk. Returns (index, result_text) or (index, None)."""
+    print(f"Analyzing chunk {index + 1}/{total}...")
+    try:
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "nvidia/nemotron-super-49b-v1:free",  # faster model
+                "messages": [{"role": "user", "content": build_prompt(chunk)}],
+                "max_tokens": 4096,
+                "temperature": 0.1,
+            },
+            timeout=(10, 120),  # reduced timeout: 10s connect, 120s read
+        )
 
-            response_data = response.json()
-            print(f"Chunk {i+1} response: {response_data}")
+        if response.status_code != 200:
+            print(f"OpenRouter error on chunk {index + 1}: {response.status_code} - {response.text}")
+            return (index, None)
 
-            chunk_output = response_data["choices"][0]["message"]["content"]
+        data = response.json()
+        content = data["choices"][0]["message"]["content"]
+        return (index, content if content else None)
 
-            if not chunk_output:
-                print(f"Chunk {i+1} returned empty response, skipping")
-                continue
+    except requests.exceptions.Timeout:
+        print(f"Chunk {index + 1} timed out")
+        return (index, None)
+    except Exception as e:
+        print(f"Chunk {index + 1} error: {e}")
+        return (index, None)
 
-            all_results.append(chunk_output)
 
-            # Extract language from first valid chunk only
-            if language == "Unknown":
-                lines = chunk_output.split("\n")
-                for j, line in enumerate(lines):
-                    if "Not a valid programming script" in line:
-                        is_valid_script = False
-                        language = "Not a valid script"
-                        break
-                    if "## Language:" in line:
-                        for next_line in lines[j + 1:]:
-                            if next_line.strip():
-                                language = next_line.replace("-", "").replace("**", "").strip()
-                                break
-                        break
+@app.route("/")
+def index():
+    return send_file("index.html")
+
+
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    data = request.get_json()
+    if not data or "script" not in data:
+        return jsonify({"error": "No script provided"}), 400
+
+    script = data["script"]
+
+    if not OPENROUTER_API_KEY:
+        return jsonify({"error": "OPENROUTER_API_KEY not configured"}), 500
+
+    # ── Hard size limit ──────────────────────────────────────
+    if len(script) > MAX_SIZE:
+        return jsonify({
+            "error": f"Script too large ({len(script):,} chars). Maximum allowed is {MAX_SIZE:,} characters."
+        }), 413
+
+    print(f"Script size: {len(script):,} characters")
+
+    try:
+        chunks = chunk_script(script)
+        print(f"Split into {len(chunks)} chunk(s)")
+
+        # ── Parallel processing with gevent ─────────────────
+        pool = Pool(PARALLEL_POOL)
+        jobs = [
+            pool.spawn(call_openrouter, chunk, i, len(chunks))
+            for i, chunk in enumerate(chunks)
+        ]
+        gevent.joinall(jobs, timeout=150)  # wait max 150s for all chunks
+
+        # Collect results in original order
+        raw_results = [job.value for job in jobs if job.value is not None]
+        ordered = sorted(raw_results, key=lambda x: x[0])  # sort by chunk index
+        all_results = [text for _, text in ordered if text]
 
         if not all_results:
-            print("All chunks returned empty responses")
             return jsonify({"error": "AI returned an empty response. Please try again."}), 500
 
-        # Combine all chunk results
+        # ── Detect language from first valid result ──────────
+        language = "Unknown"
+        is_valid_script = True
+
+        lines = all_results[0].split("\n")
+        for j, line in enumerate(lines):
+            if "Not a valid programming script" in line:
+                is_valid_script = False
+                language = "Not a valid script"
+                break
+            if "## Language:" in line:
+                for next_line in lines[j + 1:]:
+                    if next_line.strip():
+                        language = next_line.replace("-", "").replace("**", "").strip()
+                        break
+                break
+
+        # ── Combine results ──────────────────────────────────
         if len(all_results) == 1:
             ai_output = all_results[0]
         else:
-            ai_output = f"## Analysis across {len(chunks)} sections:\n\n" + "\n\n---\n\n".join(all_results)
+            ai_output = (
+                f"## Analysis across {len(chunks)} sections:\n\n"
+                + "\n\n---\n\n".join(all_results)
+            )
 
         print(f"Detected language: {language}")
 
         return jsonify({
             "result": ai_output,
             "language": language,
-            "is_valid_script": is_valid_script
+            "is_valid_script": is_valid_script,
         })
-
-    except requests.exceptions.Timeout:
-        print("Request to OpenRouter timed out")
-        return jsonify({"error": "Analysis timed out. Please try again."}), 504
 
     except Exception as e:
         print(f"Error: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Analysis failed", "details": str(e)}), 500
+
+
+# ── Streaming endpoint (optional — use for real-time UI feedback) ──
+@app.route("/analyze/stream", methods=["POST"])
+def analyze_stream():
+    """
+    Streams partial results back to the client as each chunk finishes.
+    Frontend can listen with EventSource or fetch + ReadableStream.
+    """
+    data = request.get_json()
+    if not data or "script" not in data:
+        return jsonify({"error": "No script provided"}), 400
+
+    script = data["script"]
+
+    if not OPENROUTER_API_KEY:
+        return jsonify({"error": "OPENROUTER_API_KEY not configured"}), 500
+
+    if len(script) > MAX_SIZE:
+        return jsonify({"error": f"Script too large. Max {MAX_SIZE:,} chars."}), 413
+
+    chunks = chunk_script(script)
+
+    def generate():
+        pool = Pool(PARALLEL_POOL)
+        jobs = [pool.spawn(call_openrouter, chunk, i, len(chunks)) for i, chunk in enumerate(chunks)]
+
+        completed = set()
+        while len(completed) < len(jobs):
+            for idx, job in enumerate(jobs):
+                if idx not in completed and job.ready():
+                    completed.add(idx)
+                    result = job.value
+                    if result:
+                        _, text = result
+                        payload = json.dumps({
+                            "chunk_index": idx,
+                            "total_chunks": len(chunks),
+                            "text": text,
+                        })
+                        yield f"data: {payload}\n\n"
+            gevent.sleep(0.1)  # small poll interval
+
+        yield "data: [DONE]\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
