@@ -1,9 +1,13 @@
+from gevent import monkey
+monkey.patch_all()
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import requests
 import json
 import os
 import sys
+import gevent
 from dotenv import load_dotenv  
 
 # Load environment variables
@@ -11,6 +15,7 @@ load_dotenv()
 print(f"Python version: {sys.version}")
 print(f"Current working directory: {os.getcwd()}")
 print(f"Flask imported successfully")
+print(f"gevent version: {gevent.__version__}")
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
@@ -104,7 +109,8 @@ Input:
                 "model": "nvidia/nemotron-3-super-120b-a12b:free",
                 "messages": [
                     {"role": "user", "content": ai_prompt}
-                ]
+                ],
+                "max_tokens": 4096
             },
             timeout=(10, 570)
         )
