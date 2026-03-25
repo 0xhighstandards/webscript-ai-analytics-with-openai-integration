@@ -101,7 +101,7 @@ Input:
                 "Content-Type": "application/json",
             },
             json={
-                "model": "openai/gpt-oss-120b:free",
+                "model": "nvidia/nemotron-3-super-120b-a12b:free",
                 "messages": [
                     {"role": "user", "content": ai_prompt}
                 ]
