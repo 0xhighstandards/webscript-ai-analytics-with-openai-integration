@@ -101,7 +101,7 @@ Input:
                 "Content-Type": "application/json",
             },
             json={
-                "model": "google/gemma-3-27b-it:free",
+                "model": "openai/gpt-oss-120b:free",
                 "messages": [
                     {"role": "user", "content": ai_prompt}
                 ]
