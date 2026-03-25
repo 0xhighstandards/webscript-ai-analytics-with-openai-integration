@@ -7,6 +7,7 @@ import requests
 import json
 import os
 import sys
+import re
 import gevent
 from gevent.pool import Pool
 from dotenv import load_dotenv
@@ -145,6 +146,7 @@ def call_openrouter(chunk, index, total):
                 data = response.json()
                 content = data["choices"][0]["message"]["content"]
                 if content:
+                    content = re.sub(r"##(\w)", r"## \1", content)
                     return (index, content)
                 print(f"Chunk {index + 1} returned empty content, retrying...")
 
