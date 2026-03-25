@@ -106,7 +106,7 @@ Input:
                     {"role": "user", "content": ai_prompt}
                 ]
             },
-            timeout=(10, 600)
+            timeout=(10, 570)
         )
 
         if response.status_code != 200:
