@@ -106,7 +106,7 @@ function Guest() {
             className="collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
           >
-            {collapsed ? "➤" : "◀"}
+            {collapsed ? "▶" : "◀"}
           </button>
         </div>
 
