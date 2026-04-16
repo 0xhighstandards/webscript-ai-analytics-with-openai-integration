@@ -539,7 +539,7 @@ function UserUI() {
                 <p className="analytics-section-title">Most Used Languages</p>
                 {Object.keys(analytics.languageCounts).length === 0 ? (
                   <div style={{ textAlign: "center", padding: "20px 0", color: "#94a3b8", fontSize: 13 }}>
-                    No language data yet — analyze some scripts first!
+                    No language data yet, analyze some scripts first!
                   </div>
                 ) : (
                   <div className="analytics-donut-wrap">
