@@ -82,7 +82,6 @@
 .login-button,
 .new-chat-btn,
 .analytics-button,
-.feedback-button,
 .logout-button {
   width: 100%;
   padding: 0.55rem 0.75rem;
@@ -121,13 +120,13 @@
 }
 
 .analytics-button {
-  background: rgba(79, 209, 197, 0.1);
+  background: rgba(30, 41, 59, 0.8);
   border: 1px solid rgba(79, 209, 197, 0.4);
   color: #4fd1c5;
 }
 
 .analytics-button:hover {
-  background: linear-gradient(135deg, #0f6e56, #4fd1c5);
+  background: #4fd1c5;
   color: #0f2027;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(79, 209, 197, 0.3);
@@ -137,10 +136,18 @@
   background: rgba(30, 41, 59, 0.8);
   color: #cbd5f5;
   margin: 8px 0;
+  border: 1px solid #cbd5f5;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
 }
 
 .feedback-button:hover {
-  background: linear-gradient(135deg, #0f6e56, #4fd1c5);
+  background: #cbd5f5;
   color: #0f2027;
   transform: translateY(-1px);
 }
