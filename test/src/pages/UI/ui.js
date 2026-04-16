@@ -436,7 +436,7 @@ function UserUI() {
         <div className="sidebar-header">
           <Link to="/" className="logo">WebScript AI</Link>
           <button className="collapse-btn" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? "➤" : "◀"}
+            {collapsed ? "▶" : "◀"}
           </button>
         </div>
 
