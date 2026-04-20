@@ -401,9 +401,7 @@
 }
 
 .chat-input textarea:focus {
-  outline: none;
-  border-color: #4fd1c5;
-  box-shadow: 0 0 15px rgba(79, 209, 197, 0.3);
+  outline: 2px solid #4fd1c5;
 }
 
 /* Send button */
