@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-// render markdown returned by the API in guest mode as well
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
@@ -21,6 +20,7 @@ function Guest() {
 
   const textareaRef = useRef(null);
   const messageEndRef = useRef(null);
+  const abortControllerRef = useRef(null); // ← NEW
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +34,6 @@ function Guest() {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  // Page Loader Logic
   useEffect(() => {
     const timer = setTimeout(() => setPageLoading(false), 1800);
     return () => clearTimeout(timer);
@@ -52,11 +51,16 @@ function Guest() {
       textareaRef.current.style.height = "auto";
     }
 
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ script: currentScript, format: "markdown" }),
+        signal: controller.signal, // ← attach signal
       });
 
       if (!response.ok) throw new Error("Backend not responding");
@@ -65,23 +69,33 @@ function Guest() {
 
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: data.result,
-        },
+        { role: "assistant", content: data.result },
       ]);
     } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "⚠️ Connection Error. Please ensure the internal server is running.",
-        },
-      ]);
+      if (err.name === "AbortError") {
+        // User cancelled — silently remove the pending user message bubble
+        setMessages((prev) => prev.slice(0, -1));
+      } else {
+        console.error(err);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "⚠️ Connection Error. Please ensure the internal server is running.",
+          },
+        ]);
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  // ← NEW: cancel the ongoing request
+  const stopAnalysis = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
   };
 
@@ -94,7 +108,6 @@ function Guest() {
 
   return (
     <div className="chatgpt-layout">
-      {/* --- PAGE LOADER --- */}
       <PageLoader visible={pageLoading} />
 
       <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
@@ -151,16 +164,18 @@ function Guest() {
         <div className="chat-input">
           <textarea
             ref={textareaRef}
-            placeholder="Paste your script here…"
+            placeholder="Paste your code..."
             value={script}
             onChange={(e) => setScript(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={1}
             disabled={loading}
           />
-          <button onClick={analyzeScript} disabled={loading || !script.trim()}>
-            ➤
-          </button>
+          {loading ? (
+            <button className="stop-btn" onClick={stopAnalysis}>■</button>
+          ) : (
+            <button className="send-btn" onClick={analyzeScript} disabled={!script.trim()}>➜</button>
+          )}
         </div>
       </main>
 

@@ -36,6 +36,7 @@ function UserUI() {
   const lineChartInstance = useRef(null);
   const donutChartInstance = useRef(null);
   const barChartInstance = useRef(null);
+  const abortControllerRef = useRef(null); // ← NEW
 
   const navigate = useNavigate();
   const storedEmail = localStorage.getItem("user_email");
@@ -189,7 +190,6 @@ function UserUI() {
                       strokeStyle: "transparent",
                       hidden: false,
                       index: i,
-                      // Chart.js 4.x uses these:
                       fontColor: "#cbd5f5",
                       color: "#cbd5f5",
                     }));
@@ -344,11 +344,15 @@ function UserUI() {
     setScript("");
     setLoading(true);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ script: currentScript, format: "markdown" }),
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error("Server error");
       const data = await response.json();
@@ -371,18 +375,37 @@ function UserUI() {
                 languages: isValidLanguage
                   ? [...(chat.languages || []), detectedLanguage]
                   : chat.languages || [],
-                title: chat.title === "New Chat" ? currentScript.slice(0, 20) + "..." : chat.title,
+                title:
+                  chat.title === "New Chat"
+                    ? currentScript.slice(0, 20) + "..."
+                    : chat.title,
               }
             : chat
         )
       );
     } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "⚠️ Connection Error. Is your internal server running?" },
-      ]);
+      if (err.name === "AbortError") {
+        // User cancelled — remove the pending user message
+        setMessages((prev) => prev.slice(0, -1));
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "⚠️ Connection Error. Is your internal server running?",
+          },
+        ]);
+      }
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  /* ================= STOP ANALYSIS ================= */
+  const stopAnalysis = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
   };
 
@@ -521,10 +544,22 @@ function UserUI() {
           )}
           <div ref={messageEndRef} />
         </div>
-
+        
         <div className="chat-input">
-          <textarea ref={textareaRef} placeholder="Paste your code..." value={script} onChange={(e) => setScript(e.target.value)} onKeyDown={handleKeyDown} rows={1} disabled={loading} />
-          <button onClick={analyzeScript} disabled={loading}>➤</button>
+          <textarea
+            ref={textareaRef}
+            placeholder="Paste your code..."
+            value={script}
+            onChange={(e) => setScript(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            disabled={loading}
+          />
+          {loading ? (
+            <button className="stop-btn" onClick={stopAnalysis}>■</button>
+          ) : (
+            <button className="send-btn" onClick={analyzeScript} disabled={!script.trim()}>➜</button>
+          )}
         </div>
       </main>
 
